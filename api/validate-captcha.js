@@ -1,5 +1,5 @@
 module.exports = async (req, res) => {
-  console.log('API called: Method', req.method, 'URL', req.url); // Дебаг в Vercel Logs
+  console.log('API hit: Method', req.method, 'URL', req.url); // Дебаг в Vercel Function Logs
 
   // CORS preflight
   if (req.method === 'OPTIONS') {
@@ -12,8 +12,8 @@ module.exports = async (req, res) => {
 
   let body;
   try {
-    body = req.body || {}; // Vercel парсит JSON автоматически
-    console.log('Body received:', body); // Дебаг
+    body = req.body || {};
+    console.log('Body:', body); // Дебаг
   } catch (e) {
     console.error('Parse error:', e);
     res.status(400).json({ error: 'Invalid JSON' });
@@ -28,10 +28,8 @@ module.exports = async (req, res) => {
   }
 
   const apiKeys = new Map([
-    ['test_key_123', { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), limits: 10000 }]
+    ['test_key_123', { expires: Infinity, limits: 10000 }]
   ]);
-  const blockedFingerprints = new Set();
-
   if (!apiKeys.has(api_key)) {
     res.status(401).json({ error: 'Invalid API key' });
     return;
@@ -45,7 +43,6 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Анализ траектории
   let totalDist = 0, totalTime = 0;
   for (let i = 1; i < mousePath.length; i++) {
     const dx = mousePath[i].x - mousePath[i - 1].x;
