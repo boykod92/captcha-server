@@ -1,29 +1,30 @@
 module.exports = async (req, res) => {
-  // Дебаг: логируем метод и URL
-  console.log(`Method: ${req.method}, URL: ${req.url}`);
+  console.log('API called: Method', req.method, 'URL', req.url); // Дебаг в Vercel Logs
 
-  // Обработка preflight (CORS OPTIONS)
+  // CORS preflight
   if (req.method === 'OPTIONS') {
-    res.status(200).setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.end();
+    res.status(200).end();
+    return;
   }
 
   let body;
   try {
-    body = await req.json(); // Vercel парсит JSON для POST
-    console.log('Received body:', body); // Дебаг
+    body = req.body || {}; // Vercel парсит JSON автоматически
+    console.log('Body received:', body); // Дебаг
   } catch (e) {
-    console.error('JSON parse error:', e);
-    return res.status(400).json({ error: 'Invalid JSON' });
+    console.error('Parse error:', e);
+    res.status(400).json({ error: 'Invalid JSON' });
+    return;
   }
 
-  const { fingerprint, mousePath, time, api_key, honeypot } = body || {};
+  const { fingerprint, mousePath, time, api_key, honeypot } = body;
 
-  // Проверка входных данных
-  if (!api_key || typeof mousePath !== 'object' || !time) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!api_key || !mousePath || !time) {
+    res.status(400).json({ error: 'Missing fields' });
+    return;
   }
 
   const apiKeys = new Map([
@@ -31,32 +32,33 @@ module.exports = async (req, res) => {
   ]);
   const blockedFingerprints = new Set();
 
-  if (!apiKeys.has(api_key) || apiKeys.get(api_key).expires < new Date()) {
-    return res.status(401).json({ error: 'Invalid or expired API key' });
-  }
-  if (blockedFingerprints.has(fingerprint)) {
-    return res.status(403).json({ error: 'Blocked fingerprint' });
+  if (!apiKeys.has(api_key)) {
+    res.status(401).json({ error: 'Invalid API key' });
+    return;
   }
   if (honeypot) {
-    return res.status(403).json({ error: 'Honeypot triggered' });
+    res.status(403).json({ error: 'Honeypot triggered' });
+    return;
   }
   if (mousePath.length < 10 || time < 2000) {
-    return res.status(403).json({ error: 'Bot detected' });
+    res.status(403).json({ error: 'Bot detected' });
+    return;
   }
 
-  // Анализ траектории мыши
+  // Анализ траектории
   let totalDist = 0, totalTime = 0;
   for (let i = 1; i < mousePath.length; i++) {
     const dx = mousePath[i].x - mousePath[i - 1].x;
     const dy = mousePath[i].y - mousePath[i - 1].y;
     totalDist += Math.sqrt(dx * dx + dy * dy);
-    totalTime += mousePath[i].t - mousePath[i - 1].t || 1; // Избегаем деления на 0
+    totalTime += (mousePath[i].t - mousePath[i - 1].t) || 1;
   }
-  const avgSpeed = totalTime > 0 ? totalDist / (totalTime / 1000) : 0;
+  const avgSpeed = totalDist / (totalTime / 1000);
   if (avgSpeed > 500 || avgSpeed === 0) {
-    return res.status(403).json({ error: 'Suspicious mouse behavior' });
+    res.status(403).json({ error: 'Suspicious mouse behavior' });
+    return;
   }
 
-  res.setHeader('Access-Control-Allow-Origin', '*'); // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.json({ status: 'OK', human_score: 0.9 });
 };
