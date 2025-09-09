@@ -4,5 +4,7 @@
   "scripts": {
     "start": "node api/validate-captcha.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@vercel/node": "^2.1.2"
+  }
 }
