@@ -1,6 +1,6 @@
 (function () {
   const config = {
-    serverUrl: 'https://your-captcha-server.vercel.app/api/validate-captcha', // Замени после деплоя
+    serverUrl: 'https://captcha-server-k66l.vercel.app/api/validate-captcha', // Замени после деплоя
     apiKey: 'test_key_123',
     imgSrc: 'https://via.placeholder.com/180?text=CAPTCHA', // Замени на свой URL
     minMousePoints: 10,
@@ -161,4 +161,5 @@
       }
     }, Math.random() * 1500 + 1000);
   });
+
 })();
