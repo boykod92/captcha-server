@@ -3,7 +3,7 @@
 (function () {
   const config = {
     serverUrl: 'https://captcha-server-snowy.vercel.app/api/validate-captcha',
-    apiKey: 'test_key_123',
+    apiKey: 'prj_PdKIsJzxmXqfuFk2Xq6OLfUtrj1Z',
     imgSrc: 'https://i.ibb.co/v6DsFWLq/captcha.png',
     minMousePoints: 10,
     maxSpeed: 500,
@@ -147,6 +147,7 @@
   });
 })();
 </script>
+
 
 
 
