@@ -1,8 +1,25 @@
 {
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "outputDirectory": ".vercel/output",
-  "framework": null,
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/validate-captcha.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/captcha.js",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/validate-captcha",
+      "dest": "api/validate-captcha.js"
+    },
+    {
+      "src": "/captcha.js",
+      "dest": "public/captcha.js"
+    }
+  ],
   "headers": [
     {
       "source": "/api/validate-captcha",
