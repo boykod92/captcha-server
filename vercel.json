@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/validate-captcha.js"
+    },
+    {
+      "source": "/captcha.js",
+      "destination": "/public/captcha.js"
+    }
+  ]
+}
