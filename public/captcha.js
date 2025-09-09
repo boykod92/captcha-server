@@ -1,14 +1,14 @@
 (function () {
   const config = {
-    serverUrl: 'https://captcha-server-k66l.vercel.app/api/validate-captcha', // Замени после деплоя
+    serverUrl: '/api/validate-captcha', // Относительный путь — фиксит DNS/EAI_AGAIN!
     apiKey: 'test_key_123',
-    imgSrc: 'https://via.placeholder.com/180?text=CAPTCHA', // Замени на свой URL
+    imgSrc: 'https://i.ibb.co/v6DsFWLq/captcha.png', // Твоя оригинальная картинка
     minMousePoints: 10,
     maxSpeed: 500,
-    metrikaCounterId: '88094270', // Замени на ID клиента для Metrika
+    metrikaCounterId: '88094270', // Твой ID Metrika
   };
 
-  // Стили
+  // Стили (как раньше)
   const styles = `
     body.locked { overflow: hidden; }
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(8px); background: rgba(255, 255, 255, 0.3); z-index: 9998; }
@@ -19,7 +19,7 @@
   styleSheet.textContent = styles;
   document.head.appendChild(styleSheet);
 
-  // Куки
+  // Куки и функции (как раньше: getCookie, setCookie, randomName, placeBlock)
   function getCookie(name) {
     const matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
     return matches ? decodeURIComponent(matches[1]) : undefined;
@@ -34,7 +34,6 @@
     }
     document.cookie = updatedCookie;
   }
-
   function randomName() { return Math.random().toString(36).substring(2, 10); }
   function placeBlock(el) {
     const maxX = window.innerWidth - el.offsetWidth - 20;
@@ -75,14 +74,12 @@
     let imageLoaded = false;
     let fingerprint = 'unknown';
 
-    // Fingerprinting
+    // Fingerprinting (async, но без await, чтобы не ломать)
     if (typeof FingerprintJS !== 'undefined') {
-      const fp = await FingerprintJS.load();
-      const result = await fp.get();
-      fingerprint = result.visitorId;
+      FingerprintJS.load().then(fp => fp.get().then(result => { fingerprint = result.visitorId; }));
     }
 
-    // Mouse tracking
+    // Mouse tracking (как раньше)
     document.addEventListener('mousemove', (e) => {
       const now = Date.now();
       const dx = e.clientX - (mousePath.length ? mousePath[mousePath.length - 1].x : 0);
@@ -127,7 +124,7 @@
       }
 
       try {
-        const res = await fetch(config.serverUrl, {
+        const res = await fetch(config.serverUrl, { // Теперь относительный — без DNS!
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -161,5 +158,4 @@
       }
     }, Math.random() * 1500 + 1000);
   });
-
 })();
