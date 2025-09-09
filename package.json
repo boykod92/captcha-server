@@ -1,9 +1,7 @@
 {
   "name": "captcha-server",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "build": "npm install && mkdir -p .vercel/output/functions/api/validate-captcha.func && cp api/validate-captcha.js .vercel/output/functions/api/validate-captcha.func/index.js && mkdir -p .vercel/output/static && cp -r public/* .vercel/output/static/",
     "start": "node api/validate-captcha.js"
   },
   "dependencies": {}
