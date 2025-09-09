@@ -1,8 +1,8 @@
 {
+  "version": 2,
   "functions": {
     "api/validate-captcha.js": {
-      "maxDuration": 10,
-      "runtime": "nodejs18.x"
+      "maxDuration": 10
     }
   },
   "rewrites": [],
