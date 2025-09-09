@@ -5,22 +5,22 @@
     }
   },
   "rewrites": [
-    {
-      "source": "/api/validate-captcha",
-      "destination": "/api/validate-captcha.js"
-    },
-    {
-      "source": "/captcha.js",
-      "destination": "/public/captcha.js"
-    }
+    // Убрал — Vercel автоматически маппит /api/validate-captcha на api/validate-captcha.js
+    // Убрал для /captcha.js — static из public/ работает автоматически
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+      ]
+    },
+    {
+      "source": "/captcha.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }  // Кэш для static
       ]
     }
   ]
