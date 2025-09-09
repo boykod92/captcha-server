@@ -1,26 +1,24 @@
 {
   "functions": {
     "api/validate-captcha.js": {
-      "maxDuration": 10
+      "maxDuration": 10,
+      "runtime": "nodejs18.x" // Указываем версию для консистентности
     }
   },
-  "rewrites": [
-    // Убрал — Vercel автоматически маппит /api/validate-captcha на api/validate-captcha.js
-    // Убрал для /captcha.js — static из public/ работает автоматически
-  ],
+  "rewrites": [],
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/validate-captcha",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     },
     {
       "source": "/captcha.js",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600" }  // Кэш для static
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     }
   ]
