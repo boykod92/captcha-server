@@ -2,9 +2,8 @@
   "name": "captcha-server",
   "version": "1.0.0",
   "scripts": {
+    "build": "echo 'Build completed'",  // Пустой скрипт — Vercel не делает ничего, но проходит
     "start": "node api/validate-captcha.js"
   },
-  "dependencies": {
-    "@vercel/node": "^2.1.2"
-  }
+  "dependencies": {}
 }
