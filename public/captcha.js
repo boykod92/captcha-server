@@ -1,3 +1,5 @@
+<script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+<script>
 (function () {
   const config = {
     serverUrl: 'https://captcha-server-k66l.vercel.app/api/validate-captcha',
@@ -5,6 +7,7 @@
     imgSrc: 'https://i.ibb.co/v6DsFWLq/captcha.png',
     minMousePoints: 10,
     maxSpeed: 500,
+    minVisibleTime: 1500, // минимум 1.5с до клика
     metrikaCounterId: '88094270',
   };
 
@@ -45,12 +48,12 @@
     if (navigator.userAgent.toLowerCase().indexOf('headless') > -1 || !navigator.userAgent) return;
 
     const captchaCookie = getCookie('captcha_visits');
-    let visitCount = captchaCookie ? parseInt(captchaCookie) : 0;
-    if (visitCount > 0) {
+    if (captchaCookie) {
+      // Повторный визит
       if (typeof ym !== 'undefined') {
-        ym(config.metrikaCounterId, 'reachGoal', 'repeat_user', { visit_num: visitCount });
+        ym(config.metrikaCounterId, 'reachGoal', 'repeat_user', { visit_num: parseInt(captchaCookie) });
       }
-      setCookie('captcha_visits', visitCount + 1, { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
+      setCookie('captcha_visits', parseInt(captchaCookie) + 1, { expires: new Date(Date.now() + 365*24*60*60*1000) });
       return;
     }
 
@@ -69,22 +72,26 @@
 
     let mousePath = [];
     let lastTime = Date.now();
-    let showTime = Date.now();
-    let imageLoaded = false;
+    let showTime = 0;
     let fingerprint = 'unknown';
+    let imageLoaded = false;
 
+    // FingerprintJS
     if (typeof FingerprintJS !== 'undefined') {
       FingerprintJS.load().then(fp => fp.get().then(result => { fingerprint = result.visitorId; }));
     }
 
     document.addEventListener('mousemove', (e) => {
       const now = Date.now();
-      const dx = e.clientX - (mousePath.length ? mousePath[mousePath.length - 1].x : 0);
-      const dy = e.clientY - (mousePath.length ? mousePath[mousePath.length - 1].y : 0);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const speed = dist / ((now - lastTime) / 1000);
-      if (speed <= config.maxSpeed) {
-        mousePath.push({ x: e.clientX, y: e.clientY, t: now });
+      const dt = now - lastTime;
+      if (dt > 0 && dt < 500) { // ограничение по времени между событиями
+        const dx = e.clientX - (mousePath.length ? mousePath[mousePath.length - 1].x : e.clientX);
+        const dy = e.clientY - (mousePath.length ? mousePath[mousePath.length - 1].y : e.clientY);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const speed = dist / (dt / 1000);
+        if (speed <= config.maxSpeed) {
+          mousePath.push({ x: e.clientX, y: e.clientY, t: now });
+        }
       }
       lastTime = now;
     });
@@ -96,27 +103,16 @@
     });
 
     block.addEventListener('error', () => {
-      setTimeout(() => {
-        document.body.classList.remove('locked');
-        wrapper.remove();
-        if (typeof ym !== 'undefined') {
-          ym(config.metrikaCounterId, 'reachGoal', 'passed_captcha', { human_score: 0.5, error: true });
-        }
-        setCookie('captcha_visits', 1, { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
-      }, 3000);
+      console.error('Captcha image failed to load');
+      // Не снимаем блокировку, иначе бот сможет пройти
     });
 
-    if (block.complete && block.naturalWidth > 0) {
-      imageLoaded = true;
-      placeBlock(block);
-      showTime = Date.now();
-    }
-
-    block.addEventListener('click', async (e) => {
+    block.addEventListener('click', async () => {
       const clickTime = Date.now();
       const honeypotValue = wrapper.querySelector('.honeypot').value;
-      if (honeypotValue || !imageLoaded || mousePath.length < config.minMousePoints || clickTime - showTime < 2000) {
-        console.log('Bot detected');
+
+      if (!imageLoaded || honeypotValue || mousePath.length < config.minMousePoints || clickTime - showTime < config.minVisibleTime) {
+        console.warn('Bot detected or premature click');
         return;
       }
 
@@ -133,27 +129,21 @@
           }),
         });
         const data = await res.json();
-        console.log('Response:', data);
+        console.log('Captcha response:', data);
         if (res.ok && data.status === 'OK') {
           document.body.classList.remove('locked');
           wrapper.remove();
           if (typeof ym !== 'undefined') {
             ym(config.metrikaCounterId, 'reachGoal', 'passed_captcha', { human_score: data.human_score });
           }
-          setCookie('captcha_visits', 1, { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
+          setCookie('captcha_visits', 1, { expires: new Date(Date.now() + 365*24*60*60*1000) });
         } else {
-          console.log('Validation failed:', data.error);
+          console.warn('Validation failed:', data.error);
         }
       } catch (e) {
         console.error('Fetch error:', e);
       }
     });
-
-    setTimeout(() => {
-      if (!imageLoaded && block.style.left === '') {
-        placeBlock(block);
-        showTime = Date.now();
-      }
-    }, Math.random() * 1500 + 1000);
   });
 })();
+</script>
