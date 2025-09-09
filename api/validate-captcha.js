@@ -1,37 +1,35 @@
-module.exports = async (req, res) => {
-  console.log('API hit:', req.method, req.url);
+export default async function handler(req, res) {
+  console.log('API hit: Method', req.method, 'URL', req.url);
 
-  // CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
-  const body = req.body || {};
-  console.log('Body:', body);
-
+  let body = req.body || {};
   const { fingerprint, mousePath, time, api_key, honeypot } = body;
 
   if (!api_key || !mousePath || !time) {
-    return res.status(400).json({ error: 'Missing fields' });
+    res.status(400).json({ error: 'Missing fields' });
+    return;
   }
 
-  const apiKeys = new Map([
-    ['test_key_123', { expires: Infinity, limits: 10000 }]
-  ]);
-
-  if (!apiKeys.has(api_key)) {
-    return res.status(401).json({ error: 'Invalid API key' });
+  if (api_key !== 'test_key_123') {
+    res.status(401).json({ error: 'Invalid API key' });
+    return;
   }
 
   if (honeypot) {
-    return res.status(403).json({ error: 'Honeypot triggered' });
+    res.status(403).json({ error: 'Honeypot triggered' });
+    return;
   }
 
   if (mousePath.length < 10 || time < 2000) {
-    return res.status(403).json({ error: 'Bot detected' });
+    res.status(403).json({ error: 'Bot detected' });
+    return;
   }
 
   let totalDist = 0, totalTime = 0;
@@ -44,9 +42,10 @@ module.exports = async (req, res) => {
 
   const avgSpeed = totalDist / (totalTime / 1000);
   if (avgSpeed > 500 || avgSpeed === 0) {
-    return res.status(403).json({ error: 'Suspicious mouse behavior' });
+    res.status(403).json({ error: 'Suspicious mouse behavior' });
+    return;
   }
 
   res.setHeader('Access-Control-Allow-Origin', '*');
-  return res.json({ status: 'OK', human_score: 0.9 });
-};
+  res.json({ status: 'OK', human_score: 0.9 });
+}
