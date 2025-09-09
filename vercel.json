@@ -1,23 +1,12 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/validate-captcha.js",
-      "use": "@vercel/node"
+      "source": "/api/validate-captcha",
+      "destination": "/api/validate-captcha.js"
     },
     {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/validate-captcha",
-      "dest": "api/validate-captcha.js"
-    },
-    {
-      "src": "/captcha.js",
-      "dest": "public/captcha.js"
+      "source": "/captcha.js",
+      "destination": "/public/captcha.js"
     }
   ],
   "headers": [
@@ -29,5 +18,7 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     }
-  ]
+  ],
+  "cleanUrls": true,  // Optional: Removes .html extensions
+  "trailingSlash": false  // Optional: No trailing slash
 }
