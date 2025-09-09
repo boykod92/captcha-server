@@ -2,7 +2,11 @@
   "rewrites": [
     {
       "source": "/api/validate-captcha",
-      "destination": "/api/validate-captcha"
+      "destination": "/api/validate-captcha.js"
+    },
+    {
+      "source": "/captcha.js",
+      "destination": "/captcha.js"
     }
   ],
   "headers": [
