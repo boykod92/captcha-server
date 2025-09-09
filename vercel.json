@@ -8,10 +8,6 @@
     {
       "source": "/api/validate-captcha",
       "destination": "/api/validate-captcha.js"
-    },
-    {
-      "source": "/captcha.js",
-      "destination": "/public/captcha.js"
     }
   ],
   "headers": [
