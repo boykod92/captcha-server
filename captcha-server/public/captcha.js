@@ -1,0 +1,164 @@
+(function () {
+  const config = {
+    serverUrl: 'https://your-captcha-server.vercel.app/api/validate-captcha', // Замени после деплоя
+    apiKey: 'test_key_123',
+    imgSrc: 'https://via.placeholder.com/180?text=CAPTCHA', // Замени на свой URL
+    minMousePoints: 10,
+    maxSpeed: 500,
+    metrikaCounterId: '88094270', // Замени на ID клиента для Metrika
+  };
+
+  // Стили
+  const styles = `
+    body.locked { overflow: hidden; }
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(8px); background: rgba(255, 255, 255, 0.3); z-index: 9998; }
+    .click-img { width: 180px; user-select: none; cursor: pointer; position: fixed; z-index: 9999; }
+    .honeypot { display: none !important; }
+  `;
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
+
+  // Куки
+  function getCookie(name) {
+    const matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+  }
+  function setCookie(name, value, options = {}) {
+    options = { path: '/', ...options };
+    if (options.expires instanceof Date) options.expires = options.expires.toUTCString();
+    let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+    for (let optionKey in options) {
+      updatedCookie += "; " + optionKey;
+      if (options[optionKey] !== true) updatedCookie += "=" + options[optionKey];
+    }
+    document.cookie = updatedCookie;
+  }
+
+  function randomName() { return Math.random().toString(36).substring(2, 10); }
+  function placeBlock(el) {
+    const maxX = window.innerWidth - el.offsetWidth - 20;
+    const maxY = window.innerHeight - el.offsetHeight - 20;
+    el.style.left = Math.floor(Math.random() * maxX) + 10 + "px";
+    el.style.top = Math.floor(Math.random() * maxY) + 10 + "px";
+  }
+
+  window.addEventListener('load', async () => {
+    if (navigator.userAgent.toLowerCase().indexOf('headless') > -1 || !navigator.userAgent) return;
+
+    const captchaCookie = getCookie('captcha_visits');
+    let visitCount = captchaCookie ? parseInt(captchaCookie) : 0;
+    if (visitCount > 0) {
+      if (typeof ym !== 'undefined') {
+        ym(config.metrikaCounterId, 'reachGoal', 'repeat_user', { visit_num: visitCount });
+      }
+      setCookie('captcha_visits', visitCount + 1, { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
+      return;
+    }
+
+    document.body.classList.add('locked');
+    const wrapper = document.createElement('div');
+    wrapper.id = 'rand-wrapper';
+    document.body.appendChild(wrapper);
+
+    const randClass = randomName();
+    wrapper.innerHTML = `
+      <div class="overlay"></div>
+      <input type="text" class="honeypot" name="honeypot_field" value="">
+      <img src="${config.imgSrc}" alt="Captcha" class="click-img ${randClass}">
+    `;
+    const block = wrapper.querySelector(`.${randClass}`);
+
+    let mousePath = [];
+    let lastTime = Date.now();
+    let showTime = Date.now();
+    let imageLoaded = false;
+    let fingerprint = 'unknown';
+
+    // Fingerprinting
+    if (typeof FingerprintJS !== 'undefined') {
+      const fp = await FingerprintJS.load();
+      const result = await fp.get();
+      fingerprint = result.visitorId;
+    }
+
+    // Mouse tracking
+    document.addEventListener('mousemove', (e) => {
+      const now = Date.now();
+      const dx = e.clientX - (mousePath.length ? mousePath[mousePath.length - 1].x : 0);
+      const dy = e.clientY - (mousePath.length ? mousePath[mousePath.length - 1].y : 0);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const speed = dist / ((now - lastTime) / 1000);
+      if (speed <= config.maxSpeed) {
+        mousePath.push({ x: e.clientX, y: e.clientY, t: now });
+      }
+      lastTime = now;
+    });
+
+    block.addEventListener('load', () => {
+      imageLoaded = true;
+      placeBlock(block);
+      showTime = Date.now();
+    });
+
+    block.addEventListener('error', () => {
+      setTimeout(() => {
+        document.body.classList.remove('locked');
+        wrapper.remove();
+        if (typeof ym !== 'undefined') {
+          ym(config.metrikaCounterId, 'reachGoal', 'passed_captcha', { human_score: 0.5, error: true });
+        }
+        setCookie('captcha_visits', 1, { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
+      }, 3000);
+    });
+
+    if (block.complete && block.naturalWidth > 0) {
+      imageLoaded = true;
+      placeBlock(block);
+      showTime = Date.now();
+    }
+
+    block.addEventListener('click', async (e) => {
+      const clickTime = Date.now();
+      const honeypotValue = wrapper.querySelector('.honeypot').value;
+      if (honeypotValue || !imageLoaded || mousePath.length < config.minMousePoints || clickTime - showTime < 2000) {
+        console.log('Bot detected');
+        return false;
+      }
+
+      try {
+        const res = await fetch(config.serverUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fingerprint,
+            mousePath,
+            time: clickTime - showTime,
+            api_key: config.apiKey,
+            honeypot: honeypotValue,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'OK') {
+          document.body.classList.remove('locked');
+          wrapper.remove();
+          if (typeof ym !== 'undefined') {
+            ym(config.metrikaCounterId, 'reachGoal', 'passed_captcha', { human_score: data.human_score });
+          }
+          setCookie('captcha_visits', 1, { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
+        } else {
+          console.log('Validation failed:', data.error);
+        }
+      } catch (e) {
+        console.error('Server error:', e);
+      }
+    });
+
+    setTimeout(() => {
+      if (!imageLoaded && block.style.left === '') {
+        placeBlock(block);
+        showTime = Date.now();
+      }
+    }, Math.random() * 1500 + 1000);
+  });
+})();
