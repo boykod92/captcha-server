@@ -1,11 +1,25 @@
 {
   "version": 2,
-  "functions": {
-    "api/validate-captcha.js": {
-      "maxDuration": 10
+  "builds": [
+    {
+      "src": "api/validate-captcha.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/captcha.js",
+      "use": "@vercel/static"
     }
-  },
-  "rewrites": [],
+  ],
+  "routes": [
+    {
+      "src": "/api/validate-captcha",
+      "dest": "api/validate-captcha.js"
+    },
+    {
+      "src": "/captcha.js",
+      "dest": "public/captcha.js"
+    }
+  ],
   "headers": [
     {
       "source": "/api/validate-captcha",
@@ -13,12 +27,6 @@
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
-      ]
-    },
-    {
-      "source": "/captcha.js",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     }
   ]
