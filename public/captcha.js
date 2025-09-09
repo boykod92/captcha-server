@@ -2,7 +2,7 @@
 <script>
 (function () {
   const config = {
-    serverUrl: 'https://captcha-server-coef8i8c3-dmitriys-projects-2806d227.vercel.app/api/validate-captcha',
+    serverUrl: 'https://captcha-server.vercel.app/api/validate-captcha',
     apiKey: 'test_key_123',
     imgSrc: 'https://i.ibb.co/v6DsFWLq/captcha.png',
     minMousePoints: 10,
@@ -147,4 +147,5 @@
   });
 })();
 </script>
+
 
