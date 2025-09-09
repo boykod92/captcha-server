@@ -1,6 +1,6 @@
 (function () {
   const config = {
-    serverUrl: 'https://captcha-server-k66l.vercel.app/api/validate-captcha', // Полный URL для теста
+    serverUrl: 'https://captcha-server-k66l.vercel.app/api/validate-captcha', // Полный URL для теста (фиксит DNS)
     apiKey: 'test_key_123',
     imgSrc: 'https://i.ibb.co/v6DsFWLq/captcha.png',
     minMousePoints: 10,
@@ -133,7 +133,7 @@
           }),
         });
         const data = await res.json();
-        console.log('Server response:', data); // Дебаг
+        console.log('Response:', data); // Дебаг
         if (res.ok && data.status === 'OK') {
           document.body.classList.remove('locked');
           wrapper.remove();
