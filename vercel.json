@@ -2,7 +2,7 @@
   "functions": {
     "api/validate-captcha.js": {
       "maxDuration": 10,
-      "runtime": "nodejs18.x" // Указываем версию для консистентности
+      "runtime": "nodejs18.x"
     }
   },
   "rewrites": [],
