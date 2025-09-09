@@ -1,14 +1,13 @@
 (function () {
   const config = {
-    serverUrl: '/api/validate-captcha', // Относительный путь — фиксит DNS/EAI_AGAIN!
+    serverUrl: 'https://captcha-server-k66l.vercel.app/api/validate-captcha', // Полный URL для теста
     apiKey: 'test_key_123',
-    imgSrc: 'https://i.ibb.co/v6DsFWLq/captcha.png', // Твоя оригинальная картинка
+    imgSrc: 'https://i.ibb.co/v6DsFWLq/captcha.png',
     minMousePoints: 10,
     maxSpeed: 500,
-    metrikaCounterId: '88094270', // Твой ID Metrika
+    metrikaCounterId: '88094270',
   };
 
-  // Стили (как раньше)
   const styles = `
     body.locked { overflow: hidden; }
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(8px); background: rgba(255, 255, 255, 0.3); z-index: 9998; }
@@ -19,7 +18,6 @@
   styleSheet.textContent = styles;
   document.head.appendChild(styleSheet);
 
-  // Куки и функции (как раньше: getCookie, setCookie, randomName, placeBlock)
   function getCookie(name) {
     const matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
     return matches ? decodeURIComponent(matches[1]) : undefined;
@@ -30,7 +28,8 @@
     let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
     for (let optionKey in options) {
       updatedCookie += "; " + optionKey;
-      if (options[optionKey] !== true) updatedCookie += "=" + options[optionKey];
+      let optionValue = options[optionKey];
+      if (optionValue !== true) updatedCookie += "=" + optionValue;
     }
     document.cookie = updatedCookie;
   }
@@ -74,12 +73,10 @@
     let imageLoaded = false;
     let fingerprint = 'unknown';
 
-    // Fingerprinting (async, но без await, чтобы не ломать)
     if (typeof FingerprintJS !== 'undefined') {
       FingerprintJS.load().then(fp => fp.get().then(result => { fingerprint = result.visitorId; }));
     }
 
-    // Mouse tracking (как раньше)
     document.addEventListener('mousemove', (e) => {
       const now = Date.now();
       const dx = e.clientX - (mousePath.length ? mousePath[mousePath.length - 1].x : 0);
@@ -120,11 +117,11 @@
       const honeypotValue = wrapper.querySelector('.honeypot').value;
       if (honeypotValue || !imageLoaded || mousePath.length < config.minMousePoints || clickTime - showTime < 2000) {
         console.log('Bot detected');
-        return false;
+        return;
       }
 
       try {
-        const res = await fetch(config.serverUrl, { // Теперь относительный — без DNS!
+        const res = await fetch(config.serverUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -136,6 +133,7 @@
           }),
         });
         const data = await res.json();
+        console.log('Server response:', data); // Дебаг
         if (res.ok && data.status === 'OK') {
           document.body.classList.remove('locked');
           wrapper.remove();
@@ -147,7 +145,7 @@
           console.log('Validation failed:', data.error);
         }
       } catch (e) {
-        console.error('Server error:', e);
+        console.error('Fetch error:', e);
       }
     });
 
