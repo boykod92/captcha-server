@@ -2,11 +2,7 @@
   "rewrites": [
     {
       "source": "/api/validate-captcha",
-      "destination": "/api/validate-captcha.js"
-    },
-    {
-      "source": "/captcha.js",
-      "destination": "/public/captcha.js"
+      "destination": "/api/validate-captcha"
     }
   ],
   "headers": [
@@ -19,6 +15,6 @@
       ]
     }
   ],
-  "cleanUrls": true,  // Optional: Removes .html extensions
-  "trailingSlash": false  // Optional: No trailing slash
+  "cleanUrls": true,
+  "trailingSlash": false
 }
