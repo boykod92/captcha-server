@@ -1,46 +1,37 @@
 module.exports = async (req, res) => {
-  console.log('API hit: Method', req.method, 'URL', req.url); // Дебаг в Vercel Function Logs
+  console.log('API hit:', req.method, req.url);
 
   // CORS preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
-  let body;
-  try {
-    body = req.body || {};
-    console.log('Body:', body); // Дебаг
-  } catch (e) {
-    console.error('Parse error:', e);
-    res.status(400).json({ error: 'Invalid JSON' });
-    return;
-  }
+  const body = req.body || {};
+  console.log('Body:', body);
 
   const { fingerprint, mousePath, time, api_key, honeypot } = body;
 
   if (!api_key || !mousePath || !time) {
-    res.status(400).json({ error: 'Missing fields' });
-    return;
+    return res.status(400).json({ error: 'Missing fields' });
   }
 
   const apiKeys = new Map([
     ['test_key_123', { expires: Infinity, limits: 10000 }]
   ]);
+
   if (!apiKeys.has(api_key)) {
-    res.status(401).json({ error: 'Invalid API key' });
-    return;
+    return res.status(401).json({ error: 'Invalid API key' });
   }
+
   if (honeypot) {
-    res.status(403).json({ error: 'Honeypot triggered' });
-    return;
+    return res.status(403).json({ error: 'Honeypot triggered' });
   }
+
   if (mousePath.length < 10 || time < 2000) {
-    res.status(403).json({ error: 'Bot detected' });
-    return;
+    return res.status(403).json({ error: 'Bot detected' });
   }
 
   let totalDist = 0, totalTime = 0;
@@ -50,12 +41,12 @@ module.exports = async (req, res) => {
     totalDist += Math.sqrt(dx * dx + dy * dy);
     totalTime += (mousePath[i].t - mousePath[i - 1].t) || 1;
   }
+
   const avgSpeed = totalDist / (totalTime / 1000);
   if (avgSpeed > 500 || avgSpeed === 0) {
-    res.status(403).json({ error: 'Suspicious mouse behavior' });
-    return;
+    return res.status(403).json({ error: 'Suspicious mouse behavior' });
   }
 
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.json({ status: 'OK', human_score: 0.9 });
+  return res.json({ status: 'OK', human_score: 0.9 });
 };
