@@ -1,5 +1,6 @@
 {
   "name": "captcha-server",
   "version": "1.0.0",
-  "type": "module"
+  "type": "module",
+  "dependencies": {}
 }
