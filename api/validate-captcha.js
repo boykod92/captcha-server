@@ -17,10 +17,10 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (api_key !== 'test_key_123') {
-    res.status(401).json({ error: 'Invalid API key' });
-    return;
-  }
+ if (api_key !== 'prj_PdKIsJzxmXqfuFk2Xq6OLfUtrj1Z') {
+  res.status(401).json({ error: 'Invalid API key' });
+  return;
+}
 
   if (honeypot) {
     res.status(403).json({ error: 'Honeypot triggered' });
@@ -49,3 +49,4 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.json({ status: 'OK', human_score: 0.9 });
 }
+
