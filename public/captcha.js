@@ -49,7 +49,6 @@
 
     const captchaCookie = getCookie('captcha_visits');
     if (captchaCookie) {
-      // Повторный визит
       if (typeof ym !== 'undefined') {
         ym(config.metrikaCounterId, 'reachGoal', 'repeat_user', { visit_num: parseInt(captchaCookie) });
       }
@@ -76,7 +75,6 @@
     let fingerprint = 'unknown';
     let imageLoaded = false;
 
-    // FingerprintJS
     if (typeof FingerprintJS !== 'undefined') {
       FingerprintJS.load().then(fp => fp.get().then(result => { fingerprint = result.visitorId; }));
     }
@@ -84,7 +82,7 @@
     document.addEventListener('mousemove', (e) => {
       const now = Date.now();
       const dt = now - lastTime;
-      if (dt > 0 && dt < 500) { // ограничение по времени между событиями
+      if (dt > 0 && dt < 500) {
         const dx = e.clientX - (mousePath.length ? mousePath[mousePath.length - 1].x : e.clientX);
         const dy = e.clientY - (mousePath.length ? mousePath[mousePath.length - 1].y : e.clientY);
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -100,11 +98,6 @@
       imageLoaded = true;
       placeBlock(block);
       showTime = Date.now();
-    });
-
-    block.addEventListener('error', () => {
-      console.error('Captcha image failed to load');
-      // Не снимаем блокировку, иначе бот сможет пройти
     });
 
     block.addEventListener('click', async () => {
@@ -147,7 +140,3 @@
   });
 })();
 </script>
-
-
-
-
