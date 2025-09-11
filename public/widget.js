@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 
   // Создаём оверлей
   const overlay = document.createElement('div');
@@ -14,26 +14,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.body.appendChild(overlay);
 
-  // Загружаем капчу
-  let captchaData;
-  try {
-    const res = await fetch('/api/get-captcha');
-    captchaData = await res.json();
-  } catch (e) {
-    console.error('Ошибка при загрузке капчи:', e);
-    return;
-  }
-
-  // Создаём картинку
+  // Картинка капчи
   const img = document.createElement('img');
-  img.src = captchaData.captchaUrl;
+  img.src = 'https://i.ibb.co/s9CtxcVd/your-image.png'; // твоя картинка
   img.style.position = 'absolute';
   img.style.width = '150px';
   img.style.height = '150px';
   img.style.cursor = 'pointer';
   overlay.appendChild(img);
 
-  // Перемещение картинки
+  // Перемещение картинки случайным образом
   function moveImage() {
     const maxX = window.innerWidth - 150;
     const maxY = window.innerHeight - 150;
@@ -50,24 +40,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('mousemove', () => { mouseMoves++; });
 
   // Клик по картинке
-  img.addEventListener('click', async () => {
+  img.addEventListener('click', () => {
     const timeSinceShow = Date.now() - startTime;
 
-    try {
-      const res = await fetch('/api/validate-captcha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: captchaData.token, mouseMoves, timeSinceShow })
-      });
-      const data = await res.json();
-      if (data.success) {
-        clearInterval(moveInterval);
-        overlay.remove();
-      } else {
-        alert('Капча не пройдена, попробуйте ещё раз.');
-      }
-    } catch (e) {
-      console.error('Ошибка при проверке капчи:', e);
+    // Минимальные условия: движение мыши и таймер
+    if (mouseMoves >= 5 && timeSinceShow >= 500) {
+      clearInterval(moveInterval);
+      overlay.remove();
+    } else {
+      alert('Капча не пройдена, попробуйте ещё раз.');
     }
   });
 
