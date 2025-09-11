@@ -16,22 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Картинка капчи
   const img = document.createElement('img');
-  img.src = 'https://i.ibb.co/s9CtxcVd/your-image.png'; // твоя картинка
+  img.src = 'https://i.ibb.co/0pQK0Xf0/1-6.png'; // твоя картинка
   img.style.position = 'absolute';
-  img.style.width = '150px';
-  img.style.height = '150px';
+  img.style.width = '200px';
+  img.style.height = '200px';
   img.style.cursor = 'pointer';
   overlay.appendChild(img);
 
   // Перемещение картинки случайным образом
   function moveImage() {
-    const maxX = window.innerWidth - 150;
-    const maxY = window.innerHeight - 150;
+    const maxX = window.innerWidth - 200;
+    const maxY = window.innerHeight - 200;
     img.style.left = Math.floor(Math.random() * maxX) + 'px';
     img.style.top = Math.floor(Math.random() * maxY) + 'px';
   }
   moveImage();
-  const moveInterval = setInterval(moveImage, 1500);
+  const moveInterval = setInterval(moveImage, 2000);
 
   // Таймер и движение мыши / тача
   let mouseMoves = 0;
