@@ -34,8 +34,17 @@
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
     }
 
-    img.addEventListener('click', removeOverlay);
-    img.addEventListener('touchstart', removeOverlay);
+    // клик по картинке закрывает оверлей
+    img.addEventListener('click', (e) => {
+      e.stopPropagation(); // предотвращаем всплытие
+      removeOverlay();
+    });
+    img.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      removeOverlay();
+    });
+
+    // клик по оверлею вне картинки
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) removeOverlay();
     });
