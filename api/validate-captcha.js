@@ -1,52 +1,21 @@
-// api/validate-captcha.js
-export default async function handler(req, res) {
-  console.log('API hit: Method', req.method, 'URL', req.url);
-
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.status(200).end();
-    return;
-  }
-
-  let body = req.body || {};
-  const { fingerprint, mousePath, time, api_key, honeypot } = body;
-
-  if (!api_key || !mousePath || !time) {
-    res.status(400).json({ error: 'Missing fields' });
-    return;
-  }
-
-  if (api_key !== 'prj_PdKIsJzxmXqfuFk2Xq6OLfUtrj1Z') {
-    res.status(401).json({ error: 'Invalid API key' });
-    return;
-  }
-
-  if (honeypot) {
-    res.status(403).json({ error: 'Honeypot triggered' });
-    return;
-  }
-
-  if (mousePath.length < 10 || time < 2000) {
-    res.status(403).json({ error: 'Bot detected' });
-    return;
-  }
-
-  let totalDist = 0, totalTime = 0;
-  for (let i = 1; i < mousePath.length; i++) {
-    const dx = mousePath[i].x - mousePath[i - 1].x;
-    const dy = mousePath[i].y - mousePath[i - 1].y;
-    totalDist += Math.sqrt(dx * dx + dy * dy);
-    totalTime += (mousePath[i].t - mousePath[i - 1].t) || 1;
-  }
-
-  const avgSpeed = totalDist / (totalTime / 1000);
-  if (avgSpeed > 500 || avgSpeed === 0) {
-    res.status(403).json({ error: 'Suspicious mouse behavior' });
-    return;
-  }
-
+export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.json({ status: 'OK', human_score: 0.9 });
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const { clickX, clickY, token } = req.body;
+
+  // проверяем токен и координаты
+  // здесь пример, реально нужно сопоставлять token с zone на сервере
+  const zone = { x: 100, y: 100, width: 100, height: 100 }; // пример, замените на реальные
+
+  const hit =
+    clickX >= zone.x &&
+    clickX <= zone.x + zone.width &&
+    clickY >= zone.y &&
+    clickY <= zone.y + zone.height;
+
+  res.status(200).json({ success: hit });
 }
