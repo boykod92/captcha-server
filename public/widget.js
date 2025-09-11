@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mouseMoves >= minMoves && timeSinceShow >= 500) {
       clearInterval(moveInterval);
       overlay.remove();
+
+      // --- Добавляем событие в Яндекс.Метрику ---
+      if (typeof ym === 'function') {
+        ym(83703373, 'reachGoal', 'valid_user');
+      }
+      // ------------------------------------------
+
     } else {
       alert('Капча не пройдена, попробуйте ещё раз.');
     }
