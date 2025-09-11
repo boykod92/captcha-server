@@ -33,18 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
   moveImage();
   const moveInterval = setInterval(moveImage, 1500);
 
-  // Таймер и движение мыши
+  // Таймер и движение мыши / тача
   let mouseMoves = 0;
   let startTime = Date.now();
 
+  // Порог движений: на мобильных меньше
+  const minMoves = /Mobi|Android/i.test(navigator.userAgent) ? 1 : 5;
+
   document.addEventListener('mousemove', () => { mouseMoves++; });
+  document.addEventListener('touchmove', () => { mouseMoves++; });
 
   // Клик по картинке
   img.addEventListener('click', () => {
     const timeSinceShow = Date.now() - startTime;
 
-    // Минимальные условия: движение мыши и таймер
-    if (mouseMoves >= 5 && timeSinceShow >= 500) {
+    if (mouseMoves >= minMoves && timeSinceShow >= 500) {
       clearInterval(moveInterval);
       overlay.remove();
     } else {
