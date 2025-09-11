@@ -1,3 +1,4 @@
+// api/validate-captcha.js
 export default async function handler(req, res) {
   console.log('API hit: Method', req.method, 'URL', req.url);
 
@@ -12,13 +13,11 @@ export default async function handler(req, res) {
   let body = req.body || {};
   const { fingerprint, mousePath, time, api_key, honeypot } = body;
 
-  // Проверяем обязательные поля
   if (!api_key || !mousePath || !time) {
     res.status(400).json({ error: 'Missing fields' });
     return;
   }
 
-  // **Ключ совпадает с фронтендом**
   if (api_key !== 'prj_PdKIsJzxmXqfuFk2Xq6OLfUtrj1Z') {
     res.status(401).json({ error: 'Invalid API key' });
     return;
