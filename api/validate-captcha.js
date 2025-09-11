@@ -5,17 +5,10 @@ export default function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { clickX, clickY, token } = req.body;
+  const { token, mouseMoves, timeSinceShow } = req.body;
 
-  // проверяем токен и координаты
-  // здесь пример, реально нужно сопоставлять token с zone на сервере
-  const zone = { x: 100, y: 100, width: 100, height: 100 }; // пример, замените на реальные
+  // минимальные проверки для ботов
+  const success = mouseMoves >= 5 && timeSinceShow >= 500; // 5 движений мыши, 0.5 сек
 
-  const hit =
-    clickX >= zone.x &&
-    clickX <= zone.x + zone.width &&
-    clickY >= zone.y &&
-    clickY <= zone.y + zone.height;
-
-  res.status(200).json({ success: hit });
+  res.status(200).json({ success });
 }
