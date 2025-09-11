@@ -1,5 +1,6 @@
 (function() {
   document.addEventListener('DOMContentLoaded', () => {
+    // создаём оверлей
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
     overlay.style.top = 0;
@@ -12,14 +13,16 @@
     overlay.style.zIndex = 9999;
     document.body.appendChild(overlay);
 
+    // создаём картинку капчи
     const img = document.createElement('img');
-    img.src = 'https://i.ibb.co/s9CtxcVd/your-image.png';
+    img.src = 'https://i.ibb.co/s9CtxcVd/your-image.png'; // твоя картинка
     img.style.position = 'absolute';
     img.style.cursor = 'pointer';
     img.style.maxWidth = '150px';
     img.style.maxHeight = '150px';
     overlay.appendChild(img);
 
+    // случайное положение картинки
     function setRandomPosition() {
       const padding = 20;
       const maxX = window.innerWidth - img.width - padding;
@@ -30,26 +33,16 @@
 
     img.onload = setRandomPosition;
 
+    // удаляем оверлей
     function removeOverlay() {
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
     }
 
-    // клик по картинке закрывает оверлей
-    img.addEventListener('click', (e) => {
-      e.stopPropagation(); // предотвращаем всплытие
-      removeOverlay();
-    });
-    img.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
-      removeOverlay();
-    });
+    // только клик или тач по картинке закрывает оверлей
+    img.addEventListener('click', removeOverlay);
+    img.addEventListener('touchstart', removeOverlay);
 
-    // клик по оверлею вне картинки
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) removeOverlay();
-    });
-    overlay.addEventListener('touchstart', (e) => {
-      if (e.target === overlay) removeOverlay();
-    });
+    // **удаляем обработчики клика по самому оверлею**
+    // теперь клики вне картинки ничего не делают
   });
 })();
