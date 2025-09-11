@@ -1,21 +1,44 @@
-// public/widget.js
-(async () => {
+(async function () {
   try {
-    const response = await fetch("/api/get-captcha");
-    const { imageUrl, redirectUrl } = await response.json();
+    // Загружаем данные с API
+    const res = await fetch("/api/get-captcha");
+    const data = await res.json();
 
+    // Создаем оверлей
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.background = "rgba(255,255,255,0.7)";
+    overlay.style.backdropFilter = "blur(8px)";
+    overlay.style.zIndex = "9999";
+    document.body.appendChild(overlay);
+
+    // Картинка
     const img = document.createElement("img");
-    img.src = imageUrl;
+    img.src = data.imageUrl;
     img.style.position = "absolute";
-    img.style.left = Math.random() * (window.innerWidth - 150) + "px";
-    img.style.top = Math.random() * (window.innerHeight - 150) + "px";
-    img.style.cursor = "pointer";
     img.style.width = "150px";
+    img.style.cursor = "pointer";
 
-    img.onclick = () => window.open(redirectUrl, "_blank");
+    // Рандомное место
+    const randX = Math.random() * (window.innerWidth - 160);
+    const randY = Math.random() * (window.innerHeight - 160);
+    img.style.left = randX + "px";
+    img.style.top = randY + "px";
 
-    document.body.appendChild(img);
-  } catch (e) {
-    console.error("Widget error:", e);
+    overlay.appendChild(img);
+
+    // Клик: снимаем оверлей и ведём на ссылку
+    img.addEventListener("click", () => {
+      overlay.remove();
+      if (data.redirectUrl) {
+        window.open(data.redirectUrl, "_blank");
+      }
+    });
+  } catch (err) {
+    console.error("Ошибка в widget.js:", err);
   }
 })();
