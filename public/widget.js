@@ -1,4 +1,5 @@
-(async function() {
+document.addEventListener('DOMContentLoaded', async () => {
+
   // Создаём оверлей
   const overlay = document.createElement('div');
   Object.assign(overlay.style, {
@@ -70,4 +71,4 @@
     }
   });
 
-})();
+});
