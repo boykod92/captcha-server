@@ -5,21 +5,11 @@ export default function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // картинка капчи
   const captchaUrl = 'https://i.ibb.co/s9CtxcVd/your-image.png';
 
-  // случайная правильная зона
-  const zone = {
-    x: Math.floor(Math.random() * 200 + 50),  // пример
-    y: Math.floor(Math.random() * 200 + 50),
-    width: 100,
-    height: 100
-  };
-
-  // токен сессии для защиты
+  // генерируем токен сессии
   const token = Math.random().toString(36).substring(2, 15);
 
-  // можно хранить токен и zone в памяти или базе на сервере
-
-  res.status(200).json({ captchaUrl, zone, token });
+  // в этой версии зона = вся картинка, защита через движение мыши и таймер
+  res.status(200).json({ captchaUrl, token });
 }
