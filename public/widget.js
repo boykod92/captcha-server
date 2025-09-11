@@ -1,67 +1,52 @@
-(async function () {
-  try {
-    // 1. Получаем данные с сервера
-    const res = await fetch("https://captcha-server-snowy.vercel.app/api/get-captcha");
-    const data = await res.json();
+(function() {
+  // создаём оверлей
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(0,0,0,0.3)';
+  overlay.style.backdropFilter = 'blur(8px)';
+  overlay.style.webkitBackdropFilter = 'blur(8px)'; // для Safari
+  overlay.style.zIndex = 9999;
+  document.body.appendChild(overlay);
 
-    // 2. Создаём оверлей
-    const overlay = document.createElement("div");
-    overlay.style.position = "fixed";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100%";
-    overlay.style.height = "100%";
-    overlay.style.background = "rgba(255,255,255,0.7)";
-    overlay.style.backdropFilter = "blur(8px)";
-    overlay.style.zIndex = "9999";
-    document.body.appendChild(overlay);
+  // создаём картинку капчи
+  const img = document.createElement('img');
+  img.src = 'https://captcha-server-snowy.vercel.app/api/get-captcha';
+  img.style.position = 'absolute';
+  img.style.cursor = 'pointer';
+  img.style.maxWidth = '150px';
+  img.style.maxHeight = '150px';
+  overlay.appendChild(img);
 
-    // 3. Вставляем картинку
-    const img = document.createElement("img");
-    img.src = data.imageUrl;
-    img.style.position = "absolute";
-    img.style.width = "150px";
-    img.style.cursor = "pointer";
-
-    // Случайное место
-    const randX = Math.random() * (window.innerWidth - 160);
-    const randY = Math.random() * (window.innerHeight - 160);
-    img.style.left = randX + "px";
-    img.style.top = randY + "px";
-
-    overlay.appendChild(img);
-
-    // 4. Обработка клика
-    img.addEventListener("click", async () => {
-      overlay.remove(); // убираем блюр
-
-      // (опционально) валидация
-      try {
-        const validateRes = await fetch("https://captcha-server-snowy.vercel.app/api/validate-captcha", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            api_key: "prj_PdKIsJzxmXqfuFk2Xq6OLfUtrj1Z",
-            mousePath: [
-              { x: 0, y: 0, t: Date.now() },
-              { x: 50, y: 50, t: Date.now() + 500 }
-            ],
-            time: 2500
-          }),
-        });
-
-        const result = await validateRes.json();
-        console.log("Validate result:", result);
-      } catch (err) {
-        console.error("Ошибка валидации:", err);
-      }
-
-      // Переход
-      if (data.redirectUrl) {
-        window.open(data.redirectUrl, "_blank");
-      }
-    });
-  } catch (err) {
-    console.error("Ошибка в widget.js:", err);
+  // функция случайного положения
+  function setRandomPosition() {
+    const padding = 20; // отступ от краёв
+    const maxX = window.innerWidth - img.width - padding;
+    const maxY = window.innerHeight - img.height - padding;
+    img.style.left = Math.floor(Math.random() * maxX + padding) + 'px';
+    img.style.top = Math.floor(Math.random() * maxY + padding) + 'px';
   }
+
+  // после загрузки картинки задаём случайную позицию
+  img.onload = setRandomPosition;
+
+  // функция для удаления оверлея
+  function removeOverlay() {
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }
+
+  // обработка клика и тач на картинке
+  img.addEventListener('click', removeOverlay);
+  img.addEventListener('touchstart', removeOverlay);
+
+  // клик или тач вне картинки тоже закрывает оверлей
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) removeOverlay();
+  });
+  overlay.addEventListener('touchstart', (e) => {
+    if (e.target === overlay) removeOverlay();
+  });
 })();
