@@ -14,7 +14,7 @@
 
   // создаём картинку капчи
   const img = document.createElement('img');
-  img.src = 'https://captcha-server-snowy.vercel.app/api/get-captcha';
+  img.src = 'https://i.ibb.co/s9CtxcVd/your-image.png'; // твоя картинка
   img.style.position = 'absolute';
   img.style.cursor = 'pointer';
   img.style.maxWidth = '150px';
@@ -23,26 +23,22 @@
 
   // функция случайного положения
   function setRandomPosition() {
-    const padding = 20; // отступ от краёв
+    const padding = 20;
     const maxX = window.innerWidth - img.width - padding;
     const maxY = window.innerHeight - img.height - padding;
     img.style.left = Math.floor(Math.random() * maxX + padding) + 'px';
     img.style.top = Math.floor(Math.random() * maxY + padding) + 'px';
   }
 
-  // после загрузки картинки задаём случайную позицию
   img.onload = setRandomPosition;
 
-  // функция для удаления оверлея
   function removeOverlay() {
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   }
 
-  // обработка клика и тач на картинке
+  // клик и тач закрывают оверлей
   img.addEventListener('click', removeOverlay);
   img.addEventListener('touchstart', removeOverlay);
-
-  // клик или тач вне картинки тоже закрывает оверлей
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) removeOverlay();
   });
