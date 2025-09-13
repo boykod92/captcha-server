@@ -18,15 +18,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const img = document.createElement('img');
   img.src = 'https://i.imgur.com/CPWtQC9.png'; // твоя картинка
   img.style.position = 'absolute';
-  img.style.width = '200px';
-  img.style.height = '200px';
+  img.style.width = '20vw';      // 20% ширины экрана
+  img.style.maxWidth = '200px';  // не больше 200px
+  img.style.minWidth = '100px';  // не меньше 100px
+  img.style.height = 'auto';     // сохраняем пропорции
   img.style.cursor = 'pointer';
   overlay.appendChild(img);
 
+  // Функция для вычисления актуального размера картинки
+  function getImgSize() {
+    return img.getBoundingClientRect().width;
+  }
+
   // Перемещение картинки случайным образом
   function moveImage() {
-    const maxX = window.innerWidth - 200;
-    const maxY = window.innerHeight - 200;
+    const size = getImgSize();
+    const maxX = window.innerWidth - size;
+    const maxY = window.innerHeight - size;
     img.style.left = Math.floor(Math.random() * maxX) + 'px';
     img.style.top = Math.floor(Math.random() * maxY) + 'px';
   }
@@ -55,8 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof ym === 'function') {
         ym(83703373, 'reachGoal', 'valid_user');
       }
-      // ------------------------------------------
-
     } else {
       alert('Капча не пройдена, попробуйте ещё раз.');
     }
