@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Картинка капчи
   const img = document.createElement('img');
-  img.src = 'https://i.imgur.com/tO4m7Mu.png'; // твоя картинка
+  img.src = 'https://i.imgur.com/CPWtQC9.png'; // твоя картинка
   img.style.position = 'absolute';
   img.style.width = '200px';
   img.style.height = '200px';
